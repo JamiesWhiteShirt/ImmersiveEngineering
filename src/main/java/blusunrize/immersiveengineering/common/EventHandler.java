@@ -614,13 +614,15 @@ public class EventHandler
 
 	@SubscribeEvent
 	public void onAttackEntity(AttackEntityEvent event) {
-		/* Entity entity = event.getTarget();
+		/* CASE ONE
+		// Hit an entity to cause a CME.
+		Entity entity = event.getTarget();
 		World world = event.getTarget().world;
 		if (entity instanceof EntityLivingBase && !world.isRemote) {
 			EntityPlayer player = event.getEntityPlayer();
 			BlockPos basePos = event.getTarget().getPosition();
 			Random random = new Random();
-			for (int i = 0; i < 1000; i++) {
+			for (int i = 0; i < 10000; i++) {
 				BlockPos fromPos = basePos.add(random.nextInt(5) - random.nextInt(5), random.nextInt(5) - random.nextInt(5), random.nextInt(5) - random.nextInt(5));
 				BlockPos toPos = basePos.add(random.nextInt(5) - random.nextInt(5), random.nextInt(5) - random.nextInt(5), random.nextInt(5) - random.nextInt(5));
 				Connection connection = new Connection(fromPos, toPos, WireType.COPPER,
@@ -628,19 +630,20 @@ public class EventHandler
 				ImmersiveEngineering.packetHandler.sendToAllAround(new MessageObstructedConnection(connection, basePos, player.world),
 					new NetworkRegistry.TargetPoint(player.world.provider.getDimension(), player.posX, player.posY, player.posZ,
 						64));
-				Thread.sleep(1);
 			}
 		} */
+		/* CASE TWO
+		// Hit the entity and pause the game simultaneously to trigger CME
 		Entity entity = event.getTarget();
 		World world = entity.getEntityWorld();
 		if (world.isRemote) {
 			new Thread(() -> {
 				Random random = new Random();
                 for (int i = 0; i < 100000; i++) {
-                    // String player = ManualUtils.mc().player.getName();
                     ImmersiveEngineering.packetHandler.sendToServer(new MessageShaderManual(MessageShaderManual.MessageType.UNLOCK, Integer.toString(random.nextInt()), Integer.toString(random.nextInt())));
                 }
 			}).start();
 		}
+		*/
 	}
 }
