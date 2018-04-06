@@ -16,6 +16,7 @@ import blusunrize.immersiveengineering.api.energy.wires.IICProxy;
 import blusunrize.immersiveengineering.api.energy.wires.IImmersiveConnectable;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler;
 import blusunrize.immersiveengineering.api.energy.wires.ImmersiveNetHandler.Connection;
+import blusunrize.immersiveengineering.api.energy.wires.WireType;
 import blusunrize.immersiveengineering.api.shader.CapabilityShader;
 import blusunrize.immersiveengineering.api.shader.CapabilityShader.ShaderWrapper;
 import blusunrize.immersiveengineering.api.shader.CapabilityShader.ShaderWrapper_Direct;
@@ -37,12 +38,13 @@ import blusunrize.immersiveengineering.common.items.ItemIEShield;
 import blusunrize.immersiveengineering.common.util.*;
 import blusunrize.immersiveengineering.common.util.IEDamageSources.TeslaDamageSource;
 import blusunrize.immersiveengineering.common.util.compat.IECompatModule;
-import blusunrize.immersiveengineering.common.util.network.MessageMinecartShaderSync;
-import blusunrize.immersiveengineering.common.util.network.MessageMineralListSync;
+import blusunrize.immersiveengineering.common.util.network.*;
+import blusunrize.lib.manual.ManualUtils;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.item.EntityItem;
@@ -72,6 +74,7 @@ import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -84,6 +87,7 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.tuple.Pair;
@@ -606,5 +610,37 @@ public class EventHandler
 	public void remap(RegistryEvent.MissingMappings<?> ev)
 	{
 		NameRemapper.remap(ev);
+	}
+
+	@SubscribeEvent
+	public void onAttackEntity(AttackEntityEvent event) {
+		/* Entity entity = event.getTarget();
+		World world = event.getTarget().world;
+		if (entity instanceof EntityLivingBase && !world.isRemote) {
+			EntityPlayer player = event.getEntityPlayer();
+			BlockPos basePos = event.getTarget().getPosition();
+			Random random = new Random();
+			for (int i = 0; i < 1000; i++) {
+				BlockPos fromPos = basePos.add(random.nextInt(5) - random.nextInt(5), random.nextInt(5) - random.nextInt(5), random.nextInt(5) - random.nextInt(5));
+				BlockPos toPos = basePos.add(random.nextInt(5) - random.nextInt(5), random.nextInt(5) - random.nextInt(5), random.nextInt(5) - random.nextInt(5));
+				Connection connection = new Connection(fromPos, toPos, WireType.COPPER,
+					(int)Math.sqrt(fromPos.distanceSq(toPos)));
+				ImmersiveEngineering.packetHandler.sendToAllAround(new MessageObstructedConnection(connection, basePos, player.world),
+					new NetworkRegistry.TargetPoint(player.world.provider.getDimension(), player.posX, player.posY, player.posZ,
+						64));
+				Thread.sleep(1);
+			}
+		} */
+		Entity entity = event.getTarget();
+		World world = entity.getEntityWorld();
+		if (world.isRemote) {
+			new Thread(() -> {
+				Random random = new Random();
+                for (int i = 0; i < 100000; i++) {
+                    // String player = ManualUtils.mc().player.getName();
+                    ImmersiveEngineering.packetHandler.sendToServer(new MessageShaderManual(MessageShaderManual.MessageType.UNLOCK, Integer.toString(random.nextInt()), Integer.toString(random.nextInt())));
+                }
+			}).start();
+		}
 	}
 }
